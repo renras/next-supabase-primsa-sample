@@ -9,13 +9,13 @@ import {
 } from "@mantine/core";
 import Link from "next/link";
 
-const SignUp = () => {
+const SignIn = () => {
   return (
     <Container>
       <Container size="xs" mt={48}>
         <Paper radius="md" p="xl" withBorder>
           <Title order={2} weight={500}>
-            Register
+            Sign In
           </Title>
 
           <TextInput label="Email" mt="lg" />
@@ -23,12 +23,12 @@ const SignUp = () => {
           <TextInput label="Confirm Password" mt="sm" />
 
           <Group position="apart" mt="xl">
-            <Link href="/sign-in" passHref>
+            <Link href="/sign-up" passHref>
               <Anchor component="a" color="dimmed" size="xs">
-                Already have an account? Login
+                Don&apos;t have an account yet? Sign up
               </Anchor>
             </Link>
-            <Button type="submit">Sign Up</Button>
+            <Button type="submit">Sign In</Button>
           </Group>
         </Paper>
       </Container>
@@ -36,4 +36,4 @@ const SignUp = () => {
   );
 };
 
-export default SignUp;
+export default SignIn;
