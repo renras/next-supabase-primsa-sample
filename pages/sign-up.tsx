@@ -28,19 +28,32 @@ const SignUp = () => {
 
     if (password !== confirmPassword) {
       setNotification("Passwords do not match!");
-    }
-
-    const { data: userData, error } = await supabase.auth.signUp({
-      email: email,
-      password: password,
-    });
-
-    if (error) {
-      setNotification("Failed to sign up. Please try again later.");
       return;
     }
 
-    console.log(userData);
+    const { data: signupData, error: signupError } = await supabase.auth.signUp(
+      {
+        email: email,
+        password: password,
+      }
+    );
+
+    if (signupError) {
+      setNotification("Failed to create user. Please try again.");
+      return;
+    }
+
+    const { error: userDataError } = await supabase.from("users").insert([
+      {
+        id: signupData.user?.id,
+        updated_at: new Date().toISOString(),
+      },
+    ]);
+
+    if (userDataError) {
+      setNotification("Failed to create user. Please try again.");
+      return;
+    }
   });
 
   return (
@@ -91,7 +104,7 @@ const SignUp = () => {
             className="notification"
             onClose={() => setNotification(null)}
           >
-            Passwords do not match!
+            {notification}
           </Notification>
         </Container>
       )}
