@@ -2,20 +2,24 @@ import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import styles from "../styles/Home.module.css";
+import { Session } from "@supabase/supabase-js";
 import { supabase } from "../utils/supabaseClient";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 
 const Home: NextPage = () => {
+  const [session, setSession] = useState<Session | null>(null);
+
   useEffect(() => {
     (async () => {
-      try {
-        const { data: posts } = await supabase.from("posts").select("*");
-        console.log(posts);
-      } catch (error) {
-        console.log(error);
+      const { data } = await supabase.auth.getSession();
+
+      if (data) {
+        setSession(data.session);
       }
     })();
   }, []);
+
+  console.log(session);
 
   return (
     <div className={styles.container}>
