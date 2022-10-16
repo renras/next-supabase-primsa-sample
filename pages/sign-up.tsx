@@ -11,6 +11,7 @@ import {
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
+import { supabase } from "../utils/supabaseClient";
 
 type FormData = {
   email: string;
@@ -21,14 +22,25 @@ type FormData = {
 const SignUp = () => {
   const { register, handleSubmit } = useForm<FormData>();
   const [notification, setNotification] = useState<string | null>(null);
-  const onSubmit = handleSubmit((data) => {
+
+  const onSubmit = handleSubmit(async (data) => {
     const { email, password, confirmPassword } = data;
 
     if (password !== confirmPassword) {
       setNotification("Passwords do not match!");
     }
 
-    console.log(email);
+    const { data: userData, error } = await supabase.auth.signUp({
+      email: email,
+      password: password,
+    });
+
+    if (error) {
+      setNotification("Failed to sign up. Please try again later.");
+      return;
+    }
+
+    console.log(userData);
   });
 
   return (
