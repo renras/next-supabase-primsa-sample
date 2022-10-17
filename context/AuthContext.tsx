@@ -17,14 +17,16 @@ const authState: AuthState = {
   session: null,
 };
 
-const AuthContext = createContext<{
+export const AuthContext = createContext<{
   state: AuthState;
   dispatch: Dispatch<Action>;
   isLoading: boolean;
+  isError: boolean;
 }>({
   state: authState,
   dispatch: () => null,
   isLoading: true,
+  isError: false,
 });
 
 type Action = { type: "SET_SESSION"; payload: Session | null };
@@ -44,21 +46,39 @@ const reducer = (state: AuthState, action: Action) => {
 
 export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
+  const [isError, setIsError] = useState(false);
 
   const [state, dispatch] = useReducer(reducer, authState, () => authState);
 
   useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const { data, error } = await supabase.auth.getSession();
+
+      if (error && mounted) {
+        setIsError(true);
+        return;
+      }
+
+      if (mounted) {
+        dispatch({ type: "SET_SESSION", payload: data.session });
+        setIsLoading(false);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
     const { data: listener } = supabase.auth.onAuthStateChange(
       (event, session) => {
-        if (session) dispatch({ type: "SET_SESSION", payload: session });
-
         if (event === "SIGNED_IN")
           dispatch({ type: "SET_SESSION", payload: session });
 
         if (event === "SIGNED_OUT")
           dispatch({ type: "SET_SESSION", payload: null });
-
-        setIsLoading(false);
       }
     );
 
@@ -68,7 +88,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ state, dispatch, isLoading }}>
+    <AuthContext.Provider value={{ state, dispatch, isLoading, isError }}>
       {children}
     </AuthContext.Provider>
   );
