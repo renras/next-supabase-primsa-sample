@@ -1,20 +1,10 @@
-import { useContext } from "react";
 import type { NextPage } from "next";
 import Head from "next/head";
 import Image from "next/image";
 import styles from "../styles/Home.module.css";
-import { AuthContext } from "../context/AuthContext";
 import Layout from "../components/Layout/Layout";
 
 const Home: NextPage = () => {
-  const {
-    state: { session },
-    isLoading,
-  } = useContext(AuthContext);
-
-  if (isLoading) return <div>Loading...</div>;
-  console.log(session);
-
   return (
     <Layout>
       <div className={styles.container}>

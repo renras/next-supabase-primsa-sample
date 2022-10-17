@@ -1,13 +1,34 @@
-import { ReactNode } from "react";
-import { Header, Container, Title, Button, Group, Anchor } from "@mantine/core";
+import { ReactNode, useContext, useState } from "react";
+import {
+  Header,
+  Container,
+  Title,
+  Button,
+  Group,
+  Anchor,
+  Text,
+  Notification,
+} from "@mantine/core";
 import Link from "next/link";
 import styles from "./Layout.module.css";
+import { AuthContext } from "../../context/AuthContext";
+import { supabase } from "../../utils/supabaseClient";
 
 type Props = {
   children: ReactNode;
 };
 
 const Layout = ({ children }: Props) => {
+  const {
+    state: { session },
+  } = useContext(AuthContext);
+  const [notification, setNotification] = useState<string | null>(null);
+
+  const handleSignOut = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) setNotification("Failed to sign out. Please try again later.");
+  };
+
   return (
     <div>
       <Header height={64} className={styles.header}>
@@ -48,14 +69,40 @@ const Layout = ({ children }: Props) => {
               </Link>
             </Group>
           </nav>
-          <Link href="/sign-in" passHref>
-            <Button component="a" variant="default">
-              Sign in
-            </Button>
-          </Link>
+          {session && (
+            <Group>
+              <Text>{session.user.email}</Text>
+              <Button
+                color="red"
+                variant="outline"
+                onClick={() => handleSignOut()}
+              >
+                Logout
+              </Button>
+            </Group>
+          )}
+
+          {!session && (
+            <Link href="/sign-in" passHref>
+              <Button component="a" variant="default">
+                Sign in
+              </Button>
+            </Link>
+          )}
         </Container>
       </Header>
       <main>{children}</main>
+      {notification && (
+        <Container size={384}>
+          <Notification
+            color="red"
+            className="notification"
+            onClose={() => setNotification(null)}
+          >
+            {notification}
+          </Notification>
+        </Container>
+      )}
     </div>
   );
 };

@@ -22,7 +22,6 @@ const SignIn = () => {
 
             <TextInput label="Email" mt="lg" />
             <TextInput label="Password" mt="sm" />
-            <TextInput label="Confirm Password" mt="sm" />
 
             <Group position="apart" mt="xl">
               <Link href="/sign-up" passHref>
