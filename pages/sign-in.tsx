@@ -64,7 +64,7 @@ const SignIn = () => {
               />
 
               <Group position="apart" mt="xl">
-                <Link href="/sign-up" passHref>
+                <Link href="/register" passHref>
                   <Anchor component="a" color="dimmed" size="xs">
                     Don&apos;t have an account yet? Register
                   </Anchor>

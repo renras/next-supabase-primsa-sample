@@ -13,6 +13,7 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { supabase } from "../utils/supabaseClient";
 import Layout from "../components/Layout/Layout";
+import { useRouter } from "next/router";
 
 type FormData = {
   email: string;
@@ -23,6 +24,7 @@ type FormData = {
 const SignUp = () => {
   const { register, handleSubmit } = useForm<FormData>();
   const [notification, setNotification] = useState<string | null>(null);
+  const router = useRouter();
 
   const onSubmit = handleSubmit(async (data) => {
     const { email, password, confirmPassword } = data;
@@ -32,28 +34,26 @@ const SignUp = () => {
       return;
     }
 
-    const { data: signupData, error: signupError } = await supabase.auth.signUp(
-      {
-        email: email,
-        password: password,
-      }
-    );
+    try {
+      const { data: signupData, error: signupError } =
+        await supabase.auth.signUp({
+          email: email,
+          password: password,
+        });
 
-    if (signupError) {
-      setNotification("Failed to create user. Please try again.");
-      return;
-    }
+      if (signupError) throw signupError;
 
-    const { error: userDataError } = await supabase.from("users").insert([
-      {
-        id: signupData.user?.id,
-        updated_at: new Date().toISOString(),
-      },
-    ]);
+      const { error: userDataError } = await supabase.from("users").insert([
+        {
+          id: signupData.user?.id,
+          updated_at: new Date().toISOString(),
+        },
+      ]);
 
-    if (userDataError) {
-      setNotification("Failed to create user. Please try again.");
-      return;
+      if (userDataError) throw userDataError;
+      router.push("/");
+    } catch (error) {
+      setNotification("Failed to create user. Please try again later.");
     }
   });
 

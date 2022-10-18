@@ -81,7 +81,7 @@ const Layout = ({ children }: Props) => {
                 variant="outline"
                 onClick={() => handleSignOut()}
               >
-                Logout
+                Sign Out
               </Button>
             </Group>
           )}
