@@ -89,7 +89,7 @@ const Layout = ({ children }: Props) => {
           {!session && (
             <Link href="/sign-in" passHref>
               <Button component="a" variant="default">
-                Sign in
+                Sign In
               </Button>
             </Link>
           )}
