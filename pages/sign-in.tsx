@@ -58,6 +58,7 @@ const SignIn = () => {
 
               <TextInput
                 label="Password"
+                type="password"
                 mt="sm"
                 {...register("password", { required: true })}
               />
@@ -65,7 +66,7 @@ const SignIn = () => {
               <Group position="apart" mt="xl">
                 <Link href="/sign-up" passHref>
                   <Anchor component="a" color="dimmed" size="xs">
-                    Don&apos;t have an account yet? Sign up
+                    Don&apos;t have an account yet? Register
                   </Anchor>
                 </Link>
                 <Button type="submit">Sign In</Button>

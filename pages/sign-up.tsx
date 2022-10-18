@@ -65,7 +65,7 @@ const SignUp = () => {
             <Container size="xs" mt={48}>
               <Paper radius="md" p="xl" withBorder>
                 <Title order={2} weight={500}>
-                  Sign Up
+                  Register
                 </Title>
 
                 <TextInput
@@ -90,10 +90,10 @@ const SignUp = () => {
                 <Group position="apart" mt="xl">
                   <Link href="/sign-in" passHref>
                     <Anchor component="a" color="dimmed" size="xs">
-                      Already have an account? Login
+                      Already have an account? Sign In
                     </Anchor>
                   </Link>
-                  <Button type="submit">Sign Up</Button>
+                  <Button type="submit">Register</Button>
                 </Group>
               </Paper>
             </Container>

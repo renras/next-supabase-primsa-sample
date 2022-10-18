@@ -1,5 +1,7 @@
 import { useContext, ComponentType } from "react";
 import { AuthContext } from "../context/AuthContext";
+import { Container, Text } from "@mantine/core";
+import Layout from "../components/Layout/Layout";
 
 const withAuthentication =
   <T extends {}>(Component: ComponentType<T>) =>
@@ -11,11 +13,37 @@ const withAuthentication =
       isError,
     } = useContext(AuthContext);
 
-    if (isLoading) return <div>Loading...</div>;
-    if (isError) return <div>Error...</div>;
+    if (isLoading)
+      return (
+        <Layout>
+          <Container size="xl">
+            <Text size="xl" mt="xl">
+              Loading...
+            </Text>
+          </Container>
+        </Layout>
+      );
+    if (isError)
+      return (
+        <Layout>
+          <Container size="xl">
+            <Text size="xl" mt="xl">
+              Failed to load page. Please try again later.
+            </Text>
+          </Container>
+        </Layout>
+      );
 
     if (!session) {
-      return <div>Not authenticated</div>;
+      return (
+        <Layout>
+          <Container size="xl">
+            <Text size="xl" mt="xl">
+              Not Authenticated. Please sign in.
+            </Text>
+          </Container>
+        </Layout>
+      );
     }
 
     return <Component {...props} />;

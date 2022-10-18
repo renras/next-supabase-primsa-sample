@@ -13,6 +13,7 @@ import Link from "next/link";
 import styles from "./Layout.module.css";
 import { AuthContext } from "../../context/AuthContext";
 import { supabase } from "../../utils/supabaseClient";
+import { useRouter } from "next/router";
 
 type Props = {
   children: ReactNode;
@@ -23,6 +24,7 @@ const Layout = ({ children }: Props) => {
     state: { session },
   } = useContext(AuthContext);
   const [notification, setNotification] = useState<string | null>(null);
+  const router = useRouter();
 
   const handleSignOut = async () => {
     const { error } = await supabase.auth.signOut();
@@ -40,13 +42,14 @@ const Layout = ({ children }: Props) => {
               <Link href="/" passHref>
                 <Anchor
                   component="a"
-                  color="gray"
+                  color={router.pathname === "/" ? "blue" : "gray"}
                   sx={(theme) => ({
                     transition: "0.3s",
                     "&:hover": {
                       color: theme.colors.blue,
                     },
                   })}
+                  underline={false}
                 >
                   Home
                 </Anchor>
@@ -56,13 +59,14 @@ const Layout = ({ children }: Props) => {
               <Link href="/protected" passHref>
                 <Anchor
                   component="a"
-                  color="gray"
+                  color={router.pathname === "/protected" ? "blue" : "gray"}
                   sx={(theme) => ({
                     transition: "0.3s",
                     "&:hover": {
                       color: theme.colors.blue,
                     },
                   })}
+                  underline={false}
                 >
                   Protected
                 </Anchor>
