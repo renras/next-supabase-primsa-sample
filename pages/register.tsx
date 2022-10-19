@@ -35,22 +35,18 @@ const SignUp = () => {
     }
 
     try {
-      const { data: signupData, error: signupError } =
-        await supabase.auth.signUp({
-          email: email,
-          password: password,
-        });
+      const { error: signupError } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+      });
 
       if (signupError) throw signupError;
 
-      const { error: userDataError } = await supabase.from("users").insert([
-        {
-          id: signupData.user?.id,
-          updated_at: new Date().toISOString(),
-        },
-      ]);
-
-      if (userDataError) throw userDataError;
+      const invokeFunction = async () => {
+        const { error } = await supabase.functions.invoke("create-user");
+        if (error) throw error;
+      };
+      await invokeFunction();
       router.push("/");
     } catch (error) {
       setNotification("Failed to create user. Please try again later.");
