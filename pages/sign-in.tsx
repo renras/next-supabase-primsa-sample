@@ -12,8 +12,8 @@ import Link from "next/link";
 import Layout from "../components/Layout/Layout";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
-import { supabase } from "../utils/supabaseClient";
 import { useRouter } from "next/router";
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
 
 type FormData = {
   email: string;
@@ -24,6 +24,7 @@ const SignIn = () => {
   const { register, handleSubmit } = useForm<FormData>();
   const [notification, setNotification] = useState<string | null>(null);
   const router = useRouter();
+  const supabase = useSupabaseClient();
 
   const onSubmit = handleSubmit(async (data) => {
     try {

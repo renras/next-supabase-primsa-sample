@@ -1,4 +1,4 @@
-import { ReactNode, useContext, useState } from "react";
+import { ReactNode, useState } from "react";
 import {
   Header,
   Container,
@@ -11,20 +11,18 @@ import {
 } from "@mantine/core";
 import Link from "next/link";
 import styles from "./Layout.module.css";
-import { AuthContext } from "../../context/AuthContext";
-import { supabase } from "../../utils/supabaseClient";
 import { useRouter } from "next/router";
+import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
 
 type Props = {
   children: ReactNode;
 };
 
 const Layout = ({ children }: Props) => {
-  const {
-    state: { session },
-  } = useContext(AuthContext);
   const [notification, setNotification] = useState<string | null>(null);
   const router = useRouter();
+  const supabase = useSupabaseClient();
+  const user = useUser();
 
   const handleSignOut = async () => {
     const { error } = await supabase.auth.signOut();
@@ -73,9 +71,9 @@ const Layout = ({ children }: Props) => {
               </Link>
             </Group>
           </nav>
-          {session && (
+          {user && (
             <Group>
-              <Text>{session.user.email}</Text>
+              <Text>{user.email}</Text>
               <Button
                 color="red"
                 variant="outline"
@@ -86,7 +84,7 @@ const Layout = ({ children }: Props) => {
             </Group>
           )}
 
-          {!session && (
+          {!user && (
             <Link href="/sign-in" passHref>
               <Button component="a" variant="default">
                 Sign In
