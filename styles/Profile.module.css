@@ -1,0 +1,17 @@
+.container {
+  position: relative;
+}
+
+.background {
+  background-image: url("/images/background.jpg");
+  height: 200px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.details {
+  position: absolute;
+  top: 175px;
+  left: 64px;
+}

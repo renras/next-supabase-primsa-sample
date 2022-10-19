@@ -53,11 +53,11 @@ const Layout = ({ children }: Props) => {
                 </Anchor>
               </Link>
 
-              {/* protected */}
-              <Link href="/protected" passHref>
+              {/* profile */}
+              <Link href="/profile" passHref>
                 <Anchor
                   component="a"
-                  color={router.pathname === "/protected" ? "blue" : "gray"}
+                  color={router.pathname === "/profile" ? "blue" : "gray"}
                   sx={(theme) => ({
                     transition: "0.3s",
                     "&:hover": {
@@ -66,7 +66,7 @@ const Layout = ({ children }: Props) => {
                   })}
                   underline={false}
                 >
-                  Protected
+                  Profile
                 </Anchor>
               </Link>
             </Group>
