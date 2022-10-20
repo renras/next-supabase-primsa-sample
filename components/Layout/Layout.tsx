@@ -26,7 +26,9 @@ const Layout = ({ children }: Props) => {
 
   const handleSignOut = async () => {
     const { error } = await supabase.auth.signOut();
-    if (error) setNotification("Failed to sign out. Please try again later.");
+    if (error) {
+      setNotification("Failed to sign out. Please try again later.");
+    }
   };
 
   return (

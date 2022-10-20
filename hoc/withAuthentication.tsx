@@ -9,8 +9,6 @@ const withAuthentication =
   (props: T) => {
     const user = useUser();
 
-    console.log(user);
-
     // if (isLoading)
     //   return (
     //     <Layout>

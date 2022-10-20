@@ -26,6 +26,7 @@ const SignUp = () => {
   const [notification, setNotification] = useState<string | null>(null);
   const router = useRouter();
   const supabase = useSupabaseClient();
+  const [loading, setLoading] = useState(false);
 
   const onSubmit = handleSubmit(async (data) => {
     const { email, password, confirmPassword } = data;
@@ -36,10 +37,13 @@ const SignUp = () => {
     }
 
     try {
-      const { error: signupError } = await supabase.auth.signUp({
-        email: email,
-        password: password,
-      });
+      setLoading(true);
+      console.log("hello");
+      const { data: signupData, error: signupError } =
+        await supabase.auth.signUp({
+          email: email,
+          password: password,
+        });
 
       if (signupError) throw signupError;
 
@@ -47,10 +51,20 @@ const SignUp = () => {
         const { error } = await supabase.functions.invoke("create-user");
         if (error) throw error;
       };
+
       await invokeFunction();
+      // const { error: createUserError } = await supabase
+      //   .from("users")
+      //   .insert([{ id: signupData.user?.id, email: signupData.user?.email }]);
+
+      // if (createUserError) throw createUserError;
+
       router.push("/");
     } catch (error) {
+      console.error(error);
       setNotification("Failed to create user. Please try again later.");
+    } finally {
+      setLoading(false);
     }
   });
 
@@ -90,7 +104,9 @@ const SignUp = () => {
                       Already have an account? Sign In
                     </Anchor>
                   </Link>
-                  <Button type="submit">Register</Button>
+                  <Button type="submit" disabled={loading}>
+                    Register
+                  </Button>
                 </Group>
               </Paper>
             </Container>

@@ -3,7 +3,7 @@
 // This enables autocomplete, go to definition, etc.
 
 import { serve } from "https://deno.land/std@0.131.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.0.0-rc.12";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.0.0";
 import { corsHeaders } from "../_shared/cors.ts";
 
 console.log(`Function "select-from-table-with-auth-rls" up and running!`);
@@ -32,21 +32,15 @@ serve(async (req: Request) => {
     // Now we can get the session or user object
     const {
       data: { user },
-      error: authError,
     } = await supabaseClient.auth.getUser();
 
-    if (authError) throw authError;
-
-    const { data, error: userDataError } = await supabaseClient
+    // And we can run queries in the context of our authenticated user
+    // insert data
+    const { data, error } = await supabaseClient
       .from("users")
-      .insert([
-        {
-          id: user?.id,
-          updated_at: new Date().toISOString(),
-        },
-      ]);
+      .insert([{ id: user?.id, email: user?.email }]);
 
-    if (userDataError) throw userDataError;
+    if (error) throw error;
 
     return new Response(JSON.stringify({ user, data }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -61,7 +55,7 @@ serve(async (req: Request) => {
 });
 
 // To invoke:
-// curl -i --location --request POST 'http://localhost:54321/functions/v1/' \
+// curl -i --location --request POST 'http://localhost:54321/functions/v1/select-from-table-with-auth-rls' \
 //   --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24ifQ.625_WdcF3KHqz5amU0x2X5WWHP-OEs_4qj0ssLNHzTs' \
 //   --header 'Content-Type: application/json' \
 //   --data '{"name":"Functions"}'
