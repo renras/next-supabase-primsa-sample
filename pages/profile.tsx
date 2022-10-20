@@ -11,9 +11,11 @@ import {
 import withAuthentication from "../hoc/withAuthentication";
 import styles from "../styles/Profile.module.css";
 import { ChangeEvent, useState } from "react";
+import { useForm } from "react-hook-form";
 
 const Profile = () => {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const { register, reset } = useForm();
 
   const handleFileInputChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files && e.target.files[0];
@@ -21,8 +23,14 @@ const Profile = () => {
     if (file) {
       setAvatarPreview(URL.createObjectURL(file));
     }
+  };
 
-    e.target.value = "";
+  const handleNotificationClose = () => {
+    setAvatarPreview(null);
+    reset((formValues) => ({
+      ...formValues,
+      avatar: null,
+    }));
   };
 
   return (
@@ -43,7 +51,12 @@ const Profile = () => {
                 accept="image/jpg,image/jpeg,image/png"
                 id="profilePic"
                 hidden
-                onChange={handleFileInputChange}
+                // onChange={handleFileInputChange}
+                {...register("avatar", {
+                  onChange(event) {
+                    handleFileInputChange(event);
+                  },
+                })}
               />
             </label>
 
@@ -56,7 +69,7 @@ const Profile = () => {
           <Notification
             color="yellow"
             className="notification"
-            onClose={() => setAvatarPreview(null)}
+            onClose={() => handleNotificationClose()}
           >
             <Group>
               <Text>Detected changes in your profile</Text>
