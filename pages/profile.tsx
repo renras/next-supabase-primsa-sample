@@ -13,11 +13,17 @@ import styles from "../styles/Profile.module.css";
 import { ChangeEvent, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
-import { v4 as uuidv4 } from "uuid";
+
+type UserData = {
+  id: string;
+  name?: string;
+  email: string;
+  image?: string;
+};
 
 const Profile = () => {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const [userImage, setUserImage] = useState<any>(null);
+  const [userData, setUserData] = useState<any>(null);
   const { register, reset, getValues } = useForm();
   const supabase = useSupabaseClient();
   const user = useUser();
@@ -51,7 +57,7 @@ const Profile = () => {
 
           if (error) throw error;
 
-          setUserImage(userData.image);
+          setUserData(userData);
         } catch (error) {
           console.error(error);
         }
@@ -59,24 +65,24 @@ const Profile = () => {
     }
   }, [user, supabase, user?.id]);
 
-  const onSave = async () => {
+  const uploadAvatar = async () => {
     const avatar = getValues("avatar") as FileList;
     const file = avatar[0];
 
     if (!file) return;
 
     try {
+      if (!user?.id) throw new Error("User not found");
+
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from("avatars")
-        .upload(`avatar-${uuidv4()}`, file);
+        .upload(`${user?.id}/avatar`, file);
 
       if (uploadError) throw uploadError;
 
       const {
         data: { publicUrl },
       } = supabase.storage.from("avatars").getPublicUrl(uploadData.path);
-
-      console.log(publicUrl);
 
       //  update user where id = user.id
       const { error: updateError } = await supabase
@@ -87,9 +93,58 @@ const Profile = () => {
       if (updateError) throw updateError;
 
       setAvatarPreview(null);
-      setUserImage(publicUrl);
+      setUserData((prev: UserData) => ({
+        ...prev,
+        image: publicUrl,
+      }));
     } catch (error) {
       alert("Error!");
+    }
+  };
+
+  const updateAvatar = async () => {
+    const avatar = getValues("avatar") as FileList;
+    const file = avatar[0];
+
+    if (!file) return;
+
+    try {
+      if (!user?.id) throw new Error("User not found");
+
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from("avatars")
+        .update(`${user?.id}/avatar`, file);
+
+      if (uploadError) throw uploadError;
+
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("avatars").getPublicUrl(uploadData.path);
+
+      //  update user where id = user.id
+      const formattedPublicUrl = `${publicUrl}?t=${new Date().toISOString()}`;
+      const { error: updateError } = await supabase
+        .from("users")
+        .update({ image: formattedPublicUrl })
+        .eq("id", user?.id);
+
+      if (updateError) throw updateError;
+
+      setAvatarPreview(null);
+      setUserData((prev: UserData) => ({
+        ...prev,
+        image: formattedPublicUrl,
+      }));
+    } catch (error) {
+      alert("Error!");
+    }
+  };
+
+  const onSave = async () => {
+    if (userData?.image) {
+      updateAvatar();
+    } else {
+      uploadAvatar();
     }
   };
 
@@ -101,7 +156,7 @@ const Profile = () => {
           <Group spacing="xl">
             <label htmlFor="profilePic" className={styles.avatar}>
               <Avatar
-                src={avatarPreview || userImage}
+                src={avatarPreview || userData?.image}
                 alt="profile picture"
                 radius={100}
                 size={128}
