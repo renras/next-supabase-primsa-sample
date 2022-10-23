@@ -13,12 +13,46 @@ import styles from "../styles/Profile.module.css";
 import { ChangeEvent, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
+import imageCompression from "browser-image-compression";
 
 type UserData = {
   id: string;
   name?: string;
   email: string;
   image?: string;
+};
+
+type CompressFileReturn = {
+  file: File;
+  error: Error | null;
+};
+
+const compressFile = (file: File): Promise<CompressFileReturn> => {
+  console.log("originalFile instanceof Blob", file instanceof Blob); // true
+  console.log(`originalFile size ${file.size / 1024 / 1024} MB`);
+
+  const options = {
+    maxSizeMB: 1,
+    maxWidthOrHeight: 1920,
+    useWebWorker: true,
+  };
+
+  return new Promise(async (resolve, reject) => {
+    try {
+      const compressedFile = await imageCompression(file, options);
+      console.log(
+        "compressedFile instanceof Blob",
+        compressedFile instanceof Blob
+      ); // true
+      console.log(
+        `compressedFile size ${compressedFile.size / 1024 / 1024} MB`
+      ); // smaller than maxSizeMB
+
+      resolve({ file: compressedFile, error: null });
+    } catch (error) {
+      reject({ file: null, error: error });
+    }
+  });
 };
 
 const Profile = () => {
@@ -74,9 +108,14 @@ const Profile = () => {
     try {
       if (!user?.id) throw new Error("User not found");
 
+      const { file: compressedFile, error: compressedFileError } =
+        await compressFile(file);
+
+      if (compressedFileError) throw new Error("Error compressing file");
+
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from("avatars")
-        .upload(`${user?.id}/avatar`, file);
+        .upload(`${user?.id}/avatar`, compressedFile);
 
       if (uploadError) throw uploadError;
 
@@ -111,9 +150,14 @@ const Profile = () => {
     try {
       if (!user?.id) throw new Error("User not found");
 
+      const { file: compressedFile, error: compressedFileError } =
+        await compressFile(file);
+
+      if (compressedFileError) throw new Error("Error compressing file");
+
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from("avatars")
-        .update(`${user?.id}/avatar`, file);
+        .update(`${user?.id}/avatar`, compressedFile);
 
       if (uploadError) throw uploadError;
 
