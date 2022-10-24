@@ -12,10 +12,21 @@ generator client {
 }
 
 model User {
-  id    String  @id
-  email String  @unique
-  name  String?
-  image String?
+  id               String           @id
+  email            String           @unique
+  name             String?
+  image            String?
+  api_usage_record ApiUsageRecord[]
 
   @@map("users")
+}
+
+model ApiUsageRecord {
+  id        Int      @id @default(autoincrement())
+  api_name  String
+  called_at DateTime
+  user      User     @relation(fields: [called_by], references: [id])
+  called_by String
+
+  @@map("api_usage_records")
 }

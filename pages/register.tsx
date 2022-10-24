@@ -38,7 +38,6 @@ const SignUp = () => {
 
     try {
       setLoading(true);
-      console.log("hello");
       const { data: signupData, error: signupError } =
         await supabase.auth.signUp({
           email: email,
@@ -53,11 +52,18 @@ const SignUp = () => {
       };
 
       await invokeFunction();
-      // const { error: createUserError } = await supabase
-      //   .from("users")
-      //   .insert([{ id: signupData.user?.id, email: signupData.user?.email }]);
 
-      // if (createUserError) throw createUserError;
+      const { error: apiRecordError } = await supabase
+        .from("api_usage_records")
+        .insert([
+          {
+            api_name: "create_user",
+            called_at: new Date().toISOString(),
+            called_by: signupData?.user?.id,
+          },
+        ]);
+
+      if (apiRecordError) throw apiRecordError;
 
       router.push("/");
     } catch (error) {

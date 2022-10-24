@@ -165,8 +165,8 @@ const Profile = () => {
         data: { publicUrl },
       } = supabase.storage.from("avatars").getPublicUrl(uploadData.path);
 
-      //  update user where id = user.id
       const formattedPublicUrl = `${publicUrl}?t=${new Date().toISOString()}`;
+
       const { error: updateError } = await supabase
         .from("users")
         .update({ image: formattedPublicUrl })
