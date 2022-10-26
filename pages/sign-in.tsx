@@ -43,6 +43,19 @@ const SignIn = () => {
     }
   });
 
+  const signInWithTwitter = async () => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "twitter",
+      });
+
+      if (error) throw error;
+      // router.push("/");
+    } catch (error) {
+      setNotification("Failed to sign in. Please try again later.");
+    }
+  };
+
   return (
     <Layout>
       <Container>
@@ -90,6 +103,7 @@ const SignIn = () => {
                   radius="xl"
                   variant="default"
                   leftIcon={<AiOutlineTwitter size={20} color="#1DA1F2" />}
+                  onClick={() => signInWithTwitter()}
                 >
                   Twitter
                 </Button>
