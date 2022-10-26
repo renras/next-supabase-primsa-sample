@@ -7,6 +7,7 @@ import {
   Anchor,
   Button,
   Notification,
+  Divider,
 } from "@mantine/core";
 import Link from "next/link";
 import Layout from "../components/Layout/Layout";
@@ -14,6 +15,8 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { useRouter } from "next/router";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
+import { FcGoogle } from "react-icons/fc";
+import { AiOutlineTwitter } from "react-icons/ai";
 
 type FormData = {
   email: string;
@@ -71,6 +74,25 @@ const SignIn = () => {
                   </Anchor>
                 </Link>
                 <Button type="submit">Sign In</Button>
+              </Group>
+
+              <Divider label="Or sign in with" labelPosition="center" mt="xl" />
+
+              <Group grow mb="md" mt="xl">
+                <Button
+                  radius="xl"
+                  variant="default"
+                  leftIcon={<FcGoogle size={20} />}
+                >
+                  Google
+                </Button>
+                <Button
+                  radius="xl"
+                  variant="default"
+                  leftIcon={<AiOutlineTwitter size={20} color="#1DA1F2" />}
+                >
+                  Twitter
+                </Button>
               </Group>
             </Paper>
           </Container>
