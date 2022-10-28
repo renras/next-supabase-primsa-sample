@@ -17,6 +17,7 @@ model User {
   name             String?
   image            String?
   api_usage_record ApiUsageRecord[]
+  peer_review      PeerReview[]
 
   @@map("users")
 }
@@ -29,4 +30,12 @@ model ApiUsageRecord {
   called_by String
 
   @@map("api_usage_records")
+}
+
+model PeerReview {
+  id      Int    @id @default(autoincrement())
+  user    User   @relation(fields: [user_id], references: [id])
+  user_id String
+
+  @@map("peer_reviews")
 }
