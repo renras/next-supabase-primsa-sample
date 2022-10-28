@@ -34,11 +34,13 @@ model ApiUsageRecord {
 }
 
 model PeerReview {
-  id          Int    @id @default(autoincrement())
-  reviewer    User   @relation("GivenReviews", fields: [reviewer_id], references: [id])
+  id          Int      @id @default(autoincrement())
+  reviewer    User     @relation("GivenReviews", fields: [reviewer_id], references: [id])
   reviewer_id String
-  reviewee    User   @relation("ReceivedReviews", fields: [reviewee_id], references: [id])
+  reviewee    User     @relation("ReceivedReviews", fields: [reviewee_id], references: [id])
   reviewee_id String
+  created_at  DateTime @default(now())
+  fields      Json
 
   @@map("peer_reviews")
 }

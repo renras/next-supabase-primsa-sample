@@ -13,6 +13,7 @@ import Link from "next/link";
 import styles from "./Layout.module.css";
 import { useRouter } from "next/router";
 import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
+import { useEffect } from "react";
 
 type Props = {
   children: ReactNode;
@@ -30,6 +31,37 @@ const Layout = ({ children }: Props) => {
       setNotification("Failed to sign out. Please try again later.");
     }
   };
+
+  useEffect(() => {
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      async (event) => {
+        if (event === "SIGNED_IN") {
+          try {
+            let { data: usersData, error: usersError } = await supabase
+              .from("users")
+              .select("id");
+
+            if (usersError) throw usersError;
+
+            if (usersData && usersData[0]) return;
+
+            const invokeFunction = async () => {
+              const { error } = await supabase.functions.invoke("create-user");
+              if (error) throw error;
+            };
+
+            await invokeFunction();
+          } catch (error) {
+            console.error(error);
+          }
+        }
+      }
+    );
+
+    return () => {
+      listener.subscription.unsubscribe();
+    };
+  }, [supabase]);
 
   return (
     <div>

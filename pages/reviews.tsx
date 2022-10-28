@@ -12,6 +12,15 @@ import { useState, useEffect } from "react";
 import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
 import withAuthentication from "../hoc/withAuthentication";
 import { User } from "../types/User";
+import { useForm } from "react-hook-form";
+
+type FormData = {
+  presentationScore: number;
+  technicalScore: number;
+  assistsPeersScore: number;
+  documentationScore: number;
+  comment: string;
+};
 
 const Reviews = () => {
   const supabase = useSupabaseClient();
@@ -20,6 +29,7 @@ const Reviews = () => {
   const [usersLoading, setUsersLoading] = useState(false);
   const [users, setUsers] = useState<User[] | null>(null);
   const [isReviewing, setIsReviewing] = useState(false);
+  const { register, handleSubmit } = useForm<FormData>();
 
   useEffect(() => {
     let mounted = true;
@@ -47,6 +57,8 @@ const Reviews = () => {
   if (usersError) return <div>Error...</div>;
 
   const peers = users?.filter((peer) => peer.id !== user?.id);
+
+  const onSubmit = handleSubmit((data) => console.log(data));
 
   return (
     <>
@@ -85,16 +97,18 @@ const Reviews = () => {
           </Title>
         }
       >
-        <TextInput label="Presentation Score" type="number" mt="xl" />
-        <TextInput label="Technical Score" type="number" mt="xs" />
-        <TextInput label="Assists Peers Score" type="number" mt="xs" />
-        <TextInput label="Documentation Score" type="number" mt="xs" />
+        <form onSubmit={onSubmit}>
+          <TextInput label="Presentation Score" type="number" mt="xl" />
+          <TextInput label="Technical Score" type="number" mt="xs" />
+          <TextInput label="Assists Peers Score" type="number" mt="xs" />
+          <TextInput label="Documentation Score" type="number" mt="xs" />
 
-        <Textarea label="Comment" mt="xl" />
+          <Textarea label="Comment" mt="xl" />
 
-        <Button fullWidth mt={32} size="md">
-          Add Review
-        </Button>
+          <Button fullWidth mt={32} size="md" type="submit">
+            Add Review
+          </Button>
+        </form>
       </Modal>
     </>
   );
