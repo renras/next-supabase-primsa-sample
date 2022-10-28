@@ -2,9 +2,9 @@
 // https://deno.land/manual/getting_started/setup_your_environment
 // This enables autocomplete, go to definition, etc.
 
-import { serve } from "https://deno.land/std@0.131.0/http/server.ts";
+import { serve } from "https://deno.land/std@0.131.0/http/server";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.0.0";
-import { corsHeaders } from "../_shared/cors.ts";
+import { corsHeaders } from "../_shared/cors";
 
 console.log(`Function "select-from-table-with-auth-rls" up and running!`);
 

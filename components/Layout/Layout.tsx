@@ -88,6 +88,23 @@ const Layout = ({ children }: Props) => {
                   Metrics
                 </Anchor>
               </Link>
+
+              {/* reviews */}
+              <Link href="/reviews" passHref>
+                <Anchor
+                  component="a"
+                  color={router.pathname === "/reviews" ? "blue" : "gray"}
+                  sx={(theme) => ({
+                    transition: "0.3s",
+                    "&:hover": {
+                      color: theme.colors.blue,
+                    },
+                  })}
+                  underline={false}
+                >
+                  Reviews
+                </Anchor>
+              </Link>
             </Group>
           </nav>
           {user && (

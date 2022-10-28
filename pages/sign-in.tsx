@@ -56,6 +56,19 @@ const SignIn = () => {
     }
   };
 
+  const signInWithGoogle = async () => {
+    try {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+      });
+
+      if (error) throw error;
+      // router.push("/");
+    } catch (error) {
+      setNotification("Failed to sign in. Please try again later.");
+    }
+  };
+
   return (
     <Layout>
       <Container>
@@ -96,6 +109,7 @@ const SignIn = () => {
                   radius="xl"
                   variant="default"
                   leftIcon={<FcGoogle size={20} />}
+                  onClick={() => signInWithGoogle()}
                 >
                   Google
                 </Button>

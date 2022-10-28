@@ -14,6 +14,7 @@ import { ChangeEvent, useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
 import imageCompression from "browser-image-compression";
+import Compressor from "compressorjs";
 
 type UserData = {
   id: string;
@@ -52,6 +53,25 @@ const compressFile = (file: File): Promise<CompressFileReturn> => {
     } catch (error) {
       reject({ file: null, error: error });
     }
+  });
+};
+
+const compressFileUsingCompressorJs = (
+  file: File
+): Promise<CompressFileReturn> => {
+  return new Promise(async (resolve, reject) => {
+    new Compressor(file, {
+      quality: 0.8,
+      success: (compressedResult) => {
+        // compressedResult has the compressed file.
+        // Use the compressed file to upload the images to your server.
+        console.log(compressedResult);
+        resolve({ file: compressedResult as File, error: null });
+      },
+      error: (error) => {
+        reject({ file: null, error: error });
+      },
+    });
   });
 };
 
@@ -109,7 +129,7 @@ const Profile = () => {
       if (!user?.id) throw new Error("User not found");
 
       const { file: compressedFile, error: compressedFileError } =
-        await compressFile(file);
+        await compressFileUsingCompressorJs(file);
 
       if (compressedFileError) throw new Error("Error compressing file");
 
@@ -150,10 +170,15 @@ const Profile = () => {
     try {
       if (!user?.id) throw new Error("User not found");
 
+      const start = Date.now();
       const { file: compressedFile, error: compressedFileError } =
         await compressFile(file);
 
       if (compressedFileError) throw new Error("Error compressing file");
+      console.log(compressedFile);
+      const milliseconds = Date.now() - start;
+
+      console.log("Seconds passed = " + milliseconds / 1000);
 
       const { data: uploadData, error: uploadError } = await supabase.storage
         .from("avatars")
