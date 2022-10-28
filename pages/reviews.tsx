@@ -1,5 +1,13 @@
 import Layout from "../components/Layout/Layout";
-import { Container, Table, Button, Modal, Title } from "@mantine/core";
+import {
+  Container,
+  Table,
+  Button,
+  Modal,
+  Title,
+  TextInput,
+  Textarea,
+} from "@mantine/core";
 import { useState, useEffect } from "react";
 import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
 import withAuthentication from "../hoc/withAuthentication";
@@ -71,9 +79,22 @@ const Reviews = () => {
       <Modal
         opened={isReviewing}
         onClose={() => setIsReviewing(false)}
-        title="Evaluate your peer"
+        title={
+          <Title order={2} weight="600">
+            Review your peer
+          </Title>
+        }
       >
-        Hello
+        <TextInput label="Presentation Score" type="number" mt="xl" />
+        <TextInput label="Technical Score" type="number" mt="xs" />
+        <TextInput label="Assists Peers Score" type="number" mt="xs" />
+        <TextInput label="Documentation Score" type="number" mt="xs" />
+
+        <Textarea label="Comment" mt="xl" />
+
+        <Button fullWidth mt={32} size="md">
+          Add Review
+        </Button>
       </Modal>
     </>
   );
