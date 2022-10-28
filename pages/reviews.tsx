@@ -28,8 +28,8 @@ const Reviews = () => {
   const [usersError, setUsersError] = useState(false);
   const [usersLoading, setUsersLoading] = useState(false);
   const [users, setUsers] = useState<User[] | null>(null);
-  const [isReviewing, setIsReviewing] = useState(false);
   const { register, handleSubmit } = useForm<FormData>();
+  const [peerReviewing, setPeerReviewing] = useState<User | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -58,7 +58,25 @@ const Reviews = () => {
 
   const peers = users?.filter((peer) => peer.id !== user?.id);
 
-  const onSubmit = handleSubmit((data) => console.log(data));
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      const { error: peerReviewsError } = await supabase
+        .from("peer_reviews")
+        .insert([
+          {
+            reviewer_id: user?.id,
+            reviewee_id: peerReviewing?.id,
+            fields: data,
+          },
+        ]);
+
+      if (peerReviewsError) throw peerReviewsError;
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setPeerReviewing(null);
+    }
+  });
 
   return (
     <>
@@ -75,22 +93,26 @@ const Reviews = () => {
               </tr>
             </thead>
             <tbody>
-              {peers?.map((peer) => (
-                <tr key={peer.id}>
-                  <td>{peer.email}</td>
-                  <td>
-                    <Button onClick={() => setIsReviewing(true)}>Review</Button>
-                  </td>
-                </tr>
-              ))}
+              {peers?.map((peer) => {
+                return (
+                  <tr key={peer.id}>
+                    <td>{peer.email}</td>
+                    <td>
+                      <Button onClick={() => setPeerReviewing(peer)}>
+                        Review
+                      </Button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </Table>
         </Container>
       </Layout>
 
       <Modal
-        opened={isReviewing}
-        onClose={() => setIsReviewing(false)}
+        opened={peerReviewing !== null}
+        onClose={() => setPeerReviewing(null)}
         title={
           <Title order={2} weight="600">
             Review your peer
@@ -98,12 +120,36 @@ const Reviews = () => {
         }
       >
         <form onSubmit={onSubmit}>
-          <TextInput label="Presentation Score" type="number" mt="xl" />
-          <TextInput label="Technical Score" type="number" mt="xs" />
-          <TextInput label="Assists Peers Score" type="number" mt="xs" />
-          <TextInput label="Documentation Score" type="number" mt="xs" />
+          <TextInput
+            label="Presentation Score"
+            type="number"
+            mt="xl"
+            {...register("presentationScore", { min: 0, max: 5 })}
+          />
+          <TextInput
+            label="Technical Score"
+            type="number"
+            mt="xs"
+            {...register("technicalScore", { min: 0, max: 5 })}
+          />
+          <TextInput
+            label="Assists Peers Score"
+            type="number"
+            mt="xs"
+            {...register("assistsPeersScore", { min: 0, max: 5 })}
+          />
+          <TextInput
+            label="Documentation Score"
+            type="number"
+            mt="xs"
+            {...register("documentationScore", { min: 0, max: 5 })}
+          />
 
-          <Textarea label="Comment" mt="xl" />
+          <Textarea
+            label="Comment"
+            mt="xl"
+            {...register("comment", { min: 0, max: 5 })}
+          />
 
           <Button fullWidth mt={32} size="md" type="submit">
             Add Review
