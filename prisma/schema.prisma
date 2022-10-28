@@ -17,7 +17,8 @@ model User {
   name             String?
   image            String?
   api_usage_record ApiUsageRecord[]
-  peer_review      PeerReview[]
+  given_reviews    PeerReview[]     @relation("GivenReviews")
+  received_reviews PeerReview[]     @relation("ReceivedReviews")
 
   @@map("users")
 }
@@ -33,9 +34,11 @@ model ApiUsageRecord {
 }
 
 model PeerReview {
-  id      Int    @id @default(autoincrement())
-  user    User   @relation(fields: [user_id], references: [id])
-  user_id String
+  id          Int    @id @default(autoincrement())
+  reviewer    User   @relation("GivenReviews", fields: [reviewer_id], references: [id])
+  reviewer_id String
+  reviewee    User   @relation("ReceivedReviews", fields: [reviewee_id], references: [id])
+  reviewee_id String
 
   @@map("peer_reviews")
 }
