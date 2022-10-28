@@ -4,13 +4,7 @@ import { Table, Title, Text } from "@mantine/core";
 import { useEffect, useState } from "react";
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import styles from "../styles/Metrics.module.css";
-
-type ApiUsageRecord = {
-  id: number;
-  api_name: string;
-  called_at: Date;
-  called_by: string;
-};
+import { ApiUsageRecord } from "@prisma/client";
 
 const Metrics = () => {
   const [loading, setLoading] = useState(true);

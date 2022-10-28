@@ -7,12 +7,15 @@ import {
   Title,
   TextInput,
   Textarea,
+  Text,
+  Group,
 } from "@mantine/core";
 import { useState, useEffect } from "react";
 import { useUser, useSupabaseClient } from "@supabase/auth-helpers-react";
 import withAuthentication from "../hoc/withAuthentication";
-import { User } from "../types/User";
+import { PeerReview, User } from "@prisma/client";
 import { useForm } from "react-hook-form";
+import { useRouter } from "next/router";
 
 type FormData = {
   presentationScore: number;
@@ -30,6 +33,10 @@ const Reviews = () => {
   const [users, setUsers] = useState<User[] | null>(null);
   const { register, handleSubmit } = useForm<FormData>();
   const [peerReviewing, setPeerReviewing] = useState<User | null>(null);
+  const [peerReviews, setPeerReviews] = useState<PeerReview[] | null>(null);
+  const [peerReviewsLoading, setPeerReviewsLoading] = useState(true);
+  const [peerReviewsError, setPeerReviewsError] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     let mounted = true;
@@ -53,24 +60,74 @@ const Reviews = () => {
     };
   }, [supabase]);
 
-  if (usersLoading) return <div>Loading...</div>;
-  if (usersError) return <div>Error...</div>;
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const { data: peerReviewsData, error: peerReviewsError } =
+          await supabase.from("peer_reviews").select("*");
+
+        if (peerReviewsError) throw Error;
+        const peerReviews = peerReviewsData as PeerReview[];
+        setPeerReviews(peerReviews);
+      } catch {
+        setPeerReviewsError(true);
+      } finally {
+        setPeerReviewsLoading(false);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [supabase]);
+
+  if (usersLoading || peerReviewsLoading) return <div>Loading...</div>;
+  if (usersError || peerReviewsError) return <div>Error...</div>;
 
   const peers = users?.filter((peer) => peer.id !== user?.id);
 
   const onSubmit = handleSubmit(async (data) => {
+    const {
+      presentationScore,
+      technicalScore,
+      assistsPeersScore,
+      documentationScore,
+      comment,
+    } = data;
+
     try {
-      const { error: peerReviewsError } = await supabase
+      const { data: peerReviews, error: peerReviewsError } = await supabase
         .from("peer_reviews")
         .insert([
           {
             reviewer_id: user?.id,
             reviewee_id: peerReviewing?.id,
-            fields: data,
+          },
+        ])
+        .select("*");
+
+      if (peerReviewsError) throw peerReviewsError;
+
+      const peerReviewsData = peerReviews[0] as unknown as PeerReview;
+
+      const { error: peerReviewFieldsError } = await supabase
+        .from("peer_review_fields")
+        .insert([
+          {
+            peer_review_id: peerReviewsData.id,
+            presentation_score: presentationScore,
+            technical_score: technicalScore,
+            assist_peers_score: assistsPeersScore,
+            documentation_score: documentationScore,
+            comment: comment,
+            updated_at: new Date().toISOString(),
           },
         ]);
 
-      if (peerReviewsError) throw peerReviewsError;
+      if (peerReviewFieldsError) throw peerReviewFieldsError;
+
+      router.reload();
     } catch (error) {
       console.error(error);
     } finally {
@@ -94,13 +151,27 @@ const Reviews = () => {
             </thead>
             <tbody>
               {peers?.map((peer) => {
+                const isReviewed = peerReviews?.find(
+                  (peerReview) =>
+                    peerReview.reviewer_id === user?.id &&
+                    peerReview.reviewee_id === peer.id
+                );
+
                 return (
                   <tr key={peer.id}>
                     <td>{peer.email}</td>
                     <td>
-                      <Button onClick={() => setPeerReviewing(peer)}>
-                        Review
-                      </Button>
+                      {!isReviewed && (
+                        <Button onClick={() => setPeerReviewing(peer)}>
+                          Review
+                        </Button>
+                      )}
+
+                      {isReviewed && (
+                        <Group>
+                          <Text color="green">Already Reviewed</Text>
+                        </Group>
+                      )}
                     </td>
                   </tr>
                 );

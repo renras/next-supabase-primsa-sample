@@ -37,20 +37,8 @@ const Layout = ({ children }: Props) => {
       async (event) => {
         if (event === "SIGNED_IN") {
           try {
-            let { data: usersData, error: usersError } = await supabase
-              .from("users")
-              .select("id");
-
-            if (usersError) throw usersError;
-
-            if (usersData && usersData[0]) return;
-
-            const invokeFunction = async () => {
-              const { error } = await supabase.functions.invoke("create-user");
-              if (error) throw error;
-            };
-
-            await invokeFunction();
+            const { error } = await supabase.functions.invoke("create-user");
+            if (error) throw error;
           } catch (error) {
             console.error(error);
           }
@@ -61,7 +49,7 @@ const Layout = ({ children }: Props) => {
     return () => {
       listener.subscription.unsubscribe();
     };
-  }, [supabase]);
+  }, [supabase, user?.id]);
 
   return (
     <div>
